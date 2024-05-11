@@ -1,0 +1,3 @@
+[submodule "src/vsc-explorer"]
+	path = src/vsc-explorer
+	url = https://github.com/techcoderx/vsc-explorer

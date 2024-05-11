@@ -21,6 +21,7 @@ const config = yargs(process.argv)
     },
     discordClientId: {
       type: 'string',
+      demandOption: true,
       description: 'Discord application ID'
     },
     vscHafApi: {
