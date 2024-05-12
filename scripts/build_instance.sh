@@ -10,7 +10,7 @@ print_help () {
   cat <<EOF
 Usage: $0 [OPTION[=VALUE]]...
 
-Builds the Docker images.
+Builds the VSC Discord bot Docker image.
 OPTIONS:
   --tag=TAG                       The image tag to use (default: latest)
   --plain-output                  Uses --progress=plain arg in Docker build command
@@ -46,7 +46,7 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-echo Building the images with tag $TAG...
+echo Building the docker image with tag $TAG...
 
 if [ -n "$BUILD_ARGS" ]; then
   echo Build args: $BUILD_ARGS

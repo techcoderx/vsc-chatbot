@@ -7,9 +7,11 @@ COPY ./scripts /app/scripts
 WORKDIR /app
 
 FROM base as prod-deps
+RUN apk add --no-cache python3 make g++
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
 FROM base AS build
+RUN apk add --no-cache python3 make g++
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm run compile
 
