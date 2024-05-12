@@ -1,11 +1,18 @@
-import { Client, Events, GatewayIntentBits, REST, Routes } from 'discord.js'
+import { ActivityType, Client, Events, GatewayIntentBits, REST, Routes } from 'discord.js'
 import config from '../config.js'
 import logger from '../logger.js'
 import { commands } from './commands.js'
 import { handler } from './handler.js'
+import { Props } from '../vsc-explorer/src/types/HafApiResult.js'
+import { fetchProps } from '../vsc-explorer/src/requests.js'
+import { thousandSeperator } from '../vsc-explorer/src/helpers.js'
 
 export class Discord {
   private client: Client
+  private vscProps?: Props
+  private vscPropsInterval?: NodeJS.Timeout
+  private activityInterval?: NodeJS.Timeout
+
   constructor() {
     this.client = new Client({
       intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages]
@@ -38,9 +45,40 @@ export class Discord {
     })
   }
 
+  runActivity() {
+    this.activityInterval = setInterval(() => {
+      if (!this.vscProps) return
+      const activityNum = Math.floor(new Date().getTime() / 60000) % 4
+      this.client.user!.setActivity({
+        type: ActivityType.Custom,
+        name: (() => {
+          switch (activityNum) {
+            case 0:
+              return `L1 Head Block: ${thousandSeperator(this.vscProps.last_processed_block)}`
+            case 1:
+              return `VSC Head Block: ${thousandSeperator(this.vscProps.l2_block_height)}`
+            case 2:
+              return `Epoch: ${thousandSeperator(this.vscProps.epoch)}`
+            case 3:
+              return `Witnesses: ${thousandSeperator(this.vscProps.witnesses)}`
+            default:
+              return ''
+          }
+        })()
+      })
+    }, 30000)
+  }
+
+  streamProps() {
+    fetchProps().then((p) => (this.vscProps = p))
+    this.vscPropsInterval = setInterval(async () => (this.vscProps = await fetchProps()), 300000)
+  }
+
   async start() {
     await this.client.login(config.discordToken)
     await this.registerCommands()
     this.handleCommands()
+    this.streamProps()
+    this.runActivity()
   }
 }
