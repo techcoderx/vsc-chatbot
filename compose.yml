@@ -1,0 +1,14 @@
+services:
+  vsc-chatbot:
+    image: vsc-chatbot
+    environment:
+      VSC_CHATBOT_LOG_LEVEL: ${VSC_CHATBOT_LOG_LEVEL:-info}
+      VSC_CHATBOT_DISCORD_CLIENT_ID: ${VSC_CHATBOT_DISCORD_CLIENT_ID}
+      VSC_CHATBOT_DISCORD_TOKEN: ${VSC_CHATBOT_DISCORD_TOKEN}
+    container_name: vsc-chatbot
+    restart: unless-stopped
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
