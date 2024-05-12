@@ -46,5 +46,27 @@ export const commands: RESTPostAPIChatInputApplicationCommandsJSONBody[] = [
         required: true
       }
     ]
+  },
+  {
+    name: 'vsc-tx-l1',
+    description: 'Retrieve L1 contract call details',
+    options: [
+      {
+        type: ApplicationCommandOptionType.String,
+        name: 'trx_id',
+        description: 'Hive transaction ID of the contract call',
+        min_length: 40,
+        max_length: 40,
+        required: true
+      },
+      {
+        type: ApplicationCommandOptionType.Integer,
+        name: 'op_pos',
+        description: 'Operation position in transaction (default 0)',
+        min_value: 0,
+        max_value: 999,
+        required: false
+      }
+    ]
   }
 ]

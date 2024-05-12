@@ -1,5 +1,5 @@
 import { APIEmbedField, CacheType, ChatInputCommandInteraction, EmbedBuilder, time } from 'discord.js'
-import { fetchL2Tx, fetchProps, fetchTxByL1Id, fetchWitness } from '../vsc-explorer/src/requests'
+import { fetchL2Tx, fetchProps, fetchTxByL1Id, fetchL1ContractCall, fetchWitness } from '../vsc-explorer/src/requests'
 import { VSC_BLOCKS_HOME } from '../constants'
 import { thousandSeperator } from '../vsc-explorer/src/helpers'
 import { l1Explorer } from '../vsc-explorer/src/settings'
@@ -120,6 +120,34 @@ export const handler: {
       .setTitle(`VSC Transaction`)
       .setURL(`${VSC_BLOCKS_HOME}/vsc-tx/${trx_id}`)
       .setFields(rows)
+      .setTimestamp()
+    await interaction.followUp({ embeds: [embed] })
+  },
+  'vsc-tx-l1': async (interaction) => {
+    await interaction.deferReply()
+    const trx_id = interaction.options.getString('trx_id')!.trim().toLowerCase()
+    const op_pos = interaction.options.getInteger('op_pos') || 0
+    const tx = await fetchL1ContractCall(trx_id, op_pos)
+    if (tx.error) return await interaction.followUp({ content: tx.error })
+    const fields: APIEmbedField[] = [
+      { name: 'Transaction ID', value: trx_id },
+      { name: 'Timestamp', value: time(new Date(tx.ts + 'Z')), inline: true },
+      { name: 'L1 Block', value: `[${tx.block_num}](${l1Explorer}/b/${tx.block_num})`, inline: true },
+      { name: 'Position In Block', value: tx.idx_in_block.toString(), inline: true },
+      ...(tx.signers.active.length > 0 ? [{ name: 'Signers (Active)', value: tx.signers.active.join(', ') }] : []),
+      ...(tx.signers.posting.length > 0 ? [{ name: 'Signers (Posting)', value: tx.signers.posting.join(', ') }] : []),
+      { name: 'Contract ID', value: `[${tx.contract_id}](${VSC_BLOCKS_HOME}/contract/${tx.contract_id})` },
+      { name: 'Contract Action', value: tx.contract_action, inline: true },
+      { name: 'Type', value: tx.tx_type, inline: true },
+      { name: 'IO Gas', value: (tx.io_gas || 0).toString(), inline: true },
+      ...(tx.contract_output && tx.contract_output.length > 0
+        ? [{ name: 'Executed Successfully', value: boolToStr(!tx.contract_output.find((out) => !!out.error)) }]
+        : [])
+    ]
+    const embed = new EmbedBuilder()
+      .setTitle(`VSC L1 Contract Call`)
+      .setURL(`${VSC_BLOCKS_HOME}/tx/${trx_id}`)
+      .setFields(fields)
       .setTimestamp()
     await interaction.followUp({ embeds: [embed] })
   }
