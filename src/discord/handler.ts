@@ -1,7 +1,7 @@
 import { APIEmbedField, CacheType, ChatInputCommandInteraction, EmbedBuilder, time } from 'discord.js'
 import { fetchL2Tx, fetchProps, fetchTxByL1Id, fetchWitness } from '../vsc-explorer/src/requests'
 import { VSC_BLOCKS_HOME } from '../constants'
-import { thousandSeperator, timeAgo } from '../vsc-explorer/src/helpers'
+import { thousandSeperator } from '../vsc-explorer/src/helpers'
 import { l1Explorer } from '../vsc-explorer/src/settings'
 
 const boolToStr = (bool: boolean) => (bool ? ':white_check_mark:' : ':x:')
@@ -40,17 +40,21 @@ export const handler: {
     const witness = await fetchWitness(username)
     if (!witness.id) return await interaction.reply({ content: 'Witness ' + username + ' does not exist' })
     const latestUpdateTx = witness.enabled ? witness.enabled_at : witness.disabled_at
-    const row1: APIEmbedField[] = [
+    const fields: APIEmbedField[] = [
       { name: 'ID', value: thousandSeperator(witness.id), inline: true },
       { name: 'Username', value: witness.username, inline: true },
-      { name: 'Enabled', value: boolToStr(witness.enabled), inline: true }
-    ]
-    const row2: APIEmbedField[] = [
+      { name: 'Enabled', value: boolToStr(witness.enabled), inline: true },
       { name: 'Up To Date', value: boolToStr(witness.is_up_to_date), inline: true },
-      ...(witness.last_block ? [{ name: 'Last Block', value: thousandSeperator(witness.last_block), inline: true }] : []),
-      { name: 'Produced', value: thousandSeperator(witness.produced), inline: true }
-    ]
-    const row3: APIEmbedField[] = [
+      ...(witness.last_block
+        ? [
+            {
+              name: 'Last Block',
+              value: `[${thousandSeperator(witness.last_block)}](${VSC_BLOCKS_HOME}/block/${witness.last_block})`,
+              inline: true
+            }
+          ]
+        : []),
+      { name: 'Produced', value: thousandSeperator(witness.produced), inline: true },
       { name: 'Node DID Key', value: witness.did },
       { name: 'Last Updated', value: latestUpdateTx ? `[${latestUpdateTx}](${VSC_BLOCKS_HOME}/tx/${latestUpdateTx})` : 'Never' },
       {
@@ -63,9 +67,7 @@ export const handler: {
     const embed = new EmbedBuilder()
       .setTitle('VSC Witness Info')
       .setURL(`${VSC_BLOCKS_HOME}/@${witness.username}`)
-      .addFields(row1)
-      .addFields(row2)
-      .addFields(row3)
+      .addFields(fields)
       .setTimestamp()
     await interaction.reply({ embeds: [embed] })
   },
