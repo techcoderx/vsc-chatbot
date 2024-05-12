@@ -18,5 +18,33 @@ export const commands: RESTPostAPIChatInputApplicationCommandsJSONBody[] = [
         required: true
       }
     ]
+  },
+  {
+    name: 'l1-tx',
+    description: 'Retrieve L1 VSC transaction',
+    options: [
+      {
+        type: ApplicationCommandOptionType.String,
+        name: 'trx_id',
+        description: 'Hive transaction ID',
+        min_length: 40,
+        max_length: 40,
+        required: true
+      }
+    ]
+  },
+  {
+    name: 'vsc-tx',
+    description: 'Retrieve L2 VSC transaction',
+    options: [
+      {
+        type: ApplicationCommandOptionType.String,
+        name: 'cid',
+        description: 'VSC transaction CID',
+        min_length: 59,
+        max_length: 59,
+        required: true
+      }
+    ]
   }
 ]

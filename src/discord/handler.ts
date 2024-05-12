@@ -1,7 +1,8 @@
-import { APIEmbedField, CacheType, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
-import { fetchProps, fetchWitness } from '../vsc-explorer/src/requests'
+import { APIEmbedField, CacheType, ChatInputCommandInteraction, EmbedBuilder, time } from 'discord.js'
+import { fetchL2Tx, fetchProps, fetchTxByL1Id, fetchWitness } from '../vsc-explorer/src/requests'
 import { VSC_BLOCKS_HOME } from '../constants'
-import { thousandSeperator } from '../vsc-explorer/src/helpers'
+import { thousandSeperator, timeAgo } from '../vsc-explorer/src/helpers'
+import { l1Explorer } from '../vsc-explorer/src/settings'
 
 const boolToStr = (bool: boolean) => (bool ? ':white_check_mark:' : ':x:')
 
@@ -67,5 +68,57 @@ export const handler: {
       .addFields(row3)
       .setTimestamp()
     await interaction.reply({ embeds: [embed] })
+  },
+  'l1-tx': async (interaction) => {
+    await interaction.deferReply()
+    const trx_id = interaction.options.getString('trx_id')!.trim().toLowerCase()
+    const l1_tx = await fetchTxByL1Id(trx_id)
+    if (l1_tx.length === 0)
+      return await interaction.followUp({ content: 'There are no VSC L1 operations for this transaction ID' })
+    for (let t in l1_tx) {
+      const rows: APIEmbedField[] = [
+        { name: 'ID', value: thousandSeperator(l1_tx[t].id), inline: true },
+        { name: 'Timestamp', value: time(new Date(l1_tx[t].ts + 'Z')), inline: true },
+        { name: 'Username', value: `[${l1_tx[t].username}](${VSC_BLOCKS_HOME}/@${l1_tx[t].username})`, inline: true },
+        { name: 'Type', value: l1_tx[t].type, inline: true },
+        { name: 'Nonce', value: thousandSeperator(l1_tx[t].nonce), inline: true },
+        {
+          name: 'L1 Block',
+          value: `[${thousandSeperator(l1_tx[t].l1_block)}](${l1Explorer}/b/${l1_tx[t].l1_block})`,
+          inline: true
+        }
+      ]
+      const embed = new EmbedBuilder()
+        .setTitle(`VSC L1 Operation #${t}`)
+        .setURL(`${VSC_BLOCKS_HOME}/tx/${trx_id}`)
+        .addFields(rows)
+        .setTimestamp()
+      await interaction.followUp({ embeds: [embed] })
+    }
+  },
+  'vsc-tx': async (interaction) => {
+    await interaction.deferReply()
+    const trx_id = interaction.options.getString('cid')!.trim().toLowerCase()
+    const tx = await fetchL2Tx(trx_id)
+    if (tx.error) return await interaction.followUp({ content: tx.error })
+    const rows: APIEmbedField[] = [
+      { name: 'Transaction CID', value: trx_id },
+      { name: 'Timestamp', value: time(new Date(tx.ts + 'Z')), inline: true },
+      { name: 'L2 Block', value: `[${tx.block_num}](${VSC_BLOCKS_HOME}/block/${tx.block_num})`, inline: true },
+      { name: 'Position In Block', value: tx.idx_in_block.toString(), inline: true },
+      { name: 'Contract ID', value: `[${tx.contract_id}](${VSC_BLOCKS_HOME}/contract/${tx.contract_id})` },
+      { name: 'Contract Action', value: tx.contract_action, inline: true },
+      { name: 'Type', value: tx.tx_type, inline: true },
+      { name: 'IO Gas', value: (tx.io_gas || 0).toString(), inline: true },
+      ...(tx.contract_output && tx.contract_output.length > 0
+        ? [{ name: 'Executed Successfully', value: boolToStr(!tx.contract_output.find((out) => !!out.error)) }]
+        : [])
+    ]
+    const embed = new EmbedBuilder()
+      .setTitle(`VSC Transaction`)
+      .setURL(`${VSC_BLOCKS_HOME}/vsc-tx/${trx_id}`)
+      .setFields(rows)
+      .setTimestamp()
+    await interaction.followUp({ embeds: [embed] })
   }
 }

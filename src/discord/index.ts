@@ -1,4 +1,4 @@
-import { Client, EmbedBuilder, Events, GatewayIntentBits, REST, Routes } from 'discord.js'
+import { Client, Events, GatewayIntentBits, REST, Routes } from 'discord.js'
 import config from '../config.js'
 import logger from '../logger.js'
 import { commands } from './commands.js'
