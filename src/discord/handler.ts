@@ -58,6 +58,7 @@ export const handler: {
         : []),
       { name: 'Produced', value: thousandSeperator(witness.produced), inline: true },
       { name: 'Node DID Key', value: witness.did },
+      { name: 'Consensus DID Key', value: witness.consensus_did },
       { name: 'Last Updated', value: latestUpdateTx ? `[${latestUpdateTx}](${VSC_BLOCKS_HOME}/tx/${latestUpdateTx})` : 'Never' },
       {
         name: 'Git Commit',
