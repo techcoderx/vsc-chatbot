@@ -10,6 +10,7 @@ export const handler: {
   [name: string]: (interaction: ChatInputCommandInteraction<CacheType>) => Promise<any>
 } = {
   stats: async (interaction) => {
+    await interaction.deferReply()
     const props = await fetchProps()
     const row1: APIEmbedField[] = [
       { name: 'Hive Block Height', value: thousandSeperator(props.last_processed_block), inline: true },
@@ -33,12 +34,13 @@ export const handler: {
       .addFields(row2)
       .addFields(row3)
       .setTimestamp()
-    await interaction.reply({ embeds: [embed] })
+    await interaction.followUp({ embeds: [embed] })
   },
   witness: async (interaction) => {
+    await interaction.deferReply()
     const username = interaction.options.getString('username')!.trim().toLowerCase()
     const witness = await fetchWitness(username)
-    if (!witness.id) return await interaction.reply({ content: 'Witness ' + username + ' does not exist' })
+    if (!witness.id) return await interaction.followUp({ content: 'Witness ' + username + ' does not exist' })
     const latestUpdateTx = witness.enabled ? witness.enabled_at : witness.disabled_at
     const fields: APIEmbedField[] = [
       { name: 'ID', value: thousandSeperator(witness.id), inline: true },
@@ -69,7 +71,7 @@ export const handler: {
       .setURL(`${VSC_BLOCKS_HOME}/@${witness.username}`)
       .addFields(fields)
       .setTimestamp()
-    await interaction.reply({ embeds: [embed] })
+    await interaction.followUp({ embeds: [embed] })
   },
   'l1-tx': async (interaction) => {
     await interaction.deferReply()
