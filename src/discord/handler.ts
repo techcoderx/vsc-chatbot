@@ -38,7 +38,7 @@ export const handler: {
   },
   witness: async (interaction) => {
     await interaction.deferReply()
-    const username = interaction.options.getString('username')!.trim().toLowerCase()
+    const username = interaction.options.getString('username', true).trim().toLowerCase()
     const witness = await fetchWitness(username)
     if (!witness.id) return await interaction.followUp({ content: 'Witness ' + username + ' does not exist' })
     const latestUpdateTx = witness.enabled ? witness.enabled_at : witness.disabled_at
@@ -76,7 +76,7 @@ export const handler: {
   },
   'l1-tx': async (interaction) => {
     await interaction.deferReply()
-    const trx_id = interaction.options.getString('trx_id')!.trim().toLowerCase()
+    const trx_id = interaction.options.getString('trx_id', true).trim().toLowerCase()
     const l1_tx = await fetchTxByL1Id(trx_id)
     if (l1_tx.length === 0)
       return await interaction.followUp({ content: 'There are no VSC L1 operations for this transaction ID' })
@@ -103,7 +103,7 @@ export const handler: {
   },
   'vsc-tx': async (interaction) => {
     await interaction.deferReply()
-    const trx_id = interaction.options.getString('cid')!.trim().toLowerCase()
+    const trx_id = interaction.options.getString('cid', true).trim().toLowerCase()
     const tx = await fetchL2Tx(trx_id)
     if (tx.error) return await interaction.followUp({ content: tx.error })
     const rows: APIEmbedField[] = [
@@ -128,7 +128,7 @@ export const handler: {
   },
   'vsc-tx-l1': async (interaction) => {
     await interaction.deferReply()
-    const trx_id = interaction.options.getString('trx_id')!.trim().toLowerCase()
+    const trx_id = interaction.options.getString('trx_id', true).trim().toLowerCase()
     const op_pos = interaction.options.getInteger('op_pos') || 0
     const tx = await fetchL1ContractCall(trx_id, op_pos)
     if (tx.error) return await interaction.followUp({ content: tx.error })
