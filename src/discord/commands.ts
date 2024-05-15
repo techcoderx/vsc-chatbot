@@ -68,5 +68,31 @@ export const commands: RESTPostAPIChatInputApplicationCommandsJSONBody[] = [
         required: false
       }
     ]
+  },
+  {
+    name: 'block',
+    description: 'Retrieve a VSC block',
+    options: [
+      {
+        type: ApplicationCommandOptionType.Integer,
+        name: 'block_num',
+        description: 'VSC block number',
+        min_value: 1,
+        required: true
+      }
+    ]
+  },
+  {
+    name: 'epoch',
+    description: 'Retrieve election results of a VSC epoch',
+    options: [
+      {
+        type: ApplicationCommandOptionType.Integer,
+        name: 'epoch_num',
+        description: 'VSC epoch number',
+        min_value: 0,
+        required: true
+      }
+    ]
   }
 ]

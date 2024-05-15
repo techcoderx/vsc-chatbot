@@ -1,7 +1,15 @@
 import { APIEmbedField, CacheType, ChatInputCommandInteraction, EmbedBuilder, time } from 'discord.js'
-import { fetchL2Tx, fetchProps, fetchTxByL1Id, fetchL1ContractCall, fetchWitness } from '../vsc-explorer/src/requests'
+import {
+  fetchL2Tx,
+  fetchProps,
+  fetchTxByL1Id,
+  fetchL1ContractCall,
+  fetchWitness,
+  fetchBlock,
+  fetchEpoch
+} from '../vsc-explorer/src/requests'
 import { VSC_BLOCKS_HOME } from '../constants'
-import { thousandSeperator } from '../vsc-explorer/src/helpers'
+import { getBitsetStrFromHex, getPercentFromBitsetStr, thousandSeperator } from '../vsc-explorer/src/helpers'
 import { l1Explorer } from '../vsc-explorer/src/settings'
 
 const boolToStr = (bool: boolean) => (bool ? ':white_check_mark:' : ':x:')
@@ -150,6 +158,48 @@ export const handler: {
     const embed = new EmbedBuilder()
       .setTitle(`VSC L1 Contract Call`)
       .setURL(`${VSC_BLOCKS_HOME}/tx/${trx_id}`)
+      .setFields(fields)
+      .setTimestamp()
+    await interaction.followUp({ embeds: [embed] })
+  },
+  block: async (interaction) => {
+    await interaction.deferReply()
+    const block_num = interaction.options.getInteger('block_num', true)
+    const block = await fetchBlock(block_num)
+    if (block.error) return await interaction.followUp({ content: block.error })
+    const fields: APIEmbedField[] = [
+      { name: 'Block Number', value: thousandSeperator(block.id), inline: true },
+      { name: 'Timestamp', value: time(new Date(block.ts + 'Z')), inline: true },
+      { name: 'Transactions', value: thousandSeperator(block.txs), inline: true },
+      { name: 'Block CID', value: block.block_hash },
+      { name: 'L1 Transaction', value: `[${block.l1_tx}](${VSC_BLOCKS_HOME}/tx/${block.l1_tx})` },
+      { name: 'Proposer', value: block.proposer, inline: true },
+      { name: 'Participation', value: `${getPercentFromBitsetStr(getBitsetStrFromHex(block.signature.bv)).toFixed(2)}%` }
+    ]
+    const embed = new EmbedBuilder()
+      .setTitle('VSC Block')
+      .setURL(`${VSC_BLOCKS_HOME}/block/${block.id}`)
+      .setFields(fields)
+      .setTimestamp()
+    await interaction.followUp({ embeds: [embed] })
+  },
+  epoch: async (interaction) => {
+    await interaction.deferReply()
+    const epoch_num = interaction.options.getInteger('epoch_num', true)
+    const epoch = await fetchEpoch(epoch_num)
+    if (epoch.error) return await interaction.followUp({ content: epoch.error })
+    const fields: APIEmbedField[] = [
+      { name: 'Epoch Number', value: thousandSeperator(epoch_num), inline: true },
+      { name: 'Timestamp', value: time(new Date(epoch.ts + 'Z')), inline: true },
+      { name: 'Elected Members', value: epoch.election.join(', ') },
+      { name: 'Election Result Data CID', value: epoch.data_cid },
+      { name: 'L1 Transaction', value: `[${epoch.l1_tx}](${VSC_BLOCKS_HOME}/tx/${epoch.l1_tx})` },
+      { name: 'Proposer', value: epoch.proposer, inline: true },
+      { name: 'Participation', value: `${getPercentFromBitsetStr(getBitsetStrFromHex(epoch.bv)).toFixed(2)}%` }
+    ]
+    const embed = new EmbedBuilder()
+      .setTitle('VSC Epoch')
+      .setURL(`${VSC_BLOCKS_HOME}/epoch/${epoch_num}`)
       .setFields(fields)
       .setTimestamp()
     await interaction.followUp({ embeds: [embed] })
