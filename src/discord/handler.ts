@@ -191,7 +191,7 @@ export const handler: {
     const fields: APIEmbedField[] = [
       { name: 'Epoch Number', value: thousandSeperator(epoch_num), inline: true },
       { name: 'Timestamp', value: time(new Date(epoch.ts + 'Z')), inline: true },
-      { name: 'Elected Members', value: epoch.election.join(', ') },
+      { name: `Elected Members (${epoch.election.length})`, value: epoch.election.join(', ') },
       { name: 'Election Result Data CID', value: epoch.data_cid },
       { name: 'L1 Transaction', value: `[${epoch.l1_tx}](${VSC_BLOCKS_HOME}/tx/${epoch.l1_tx})` },
       { name: 'Proposer', value: epoch.proposer, inline: true },
