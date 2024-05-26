@@ -1,4 +1,4 @@
-import { APIEmbedField, CacheType, ChatInputCommandInteraction, EmbedBuilder, time } from 'discord.js'
+import { APIEmbedField, CacheType, ChatInputCommandInteraction, EmbedBuilder, hyperlink, time } from 'discord.js'
 import {
   fetchL2Tx,
   fetchProps,
@@ -173,6 +173,11 @@ export const handler: {
       { name: 'Transactions', value: thousandSeperator(block.txs), inline: true },
       { name: 'Block CID', value: block.block_hash },
       { name: 'L1 Transaction', value: `[${block.l1_tx}](${VSC_BLOCKS_HOME}/tx/${block.l1_tx})` },
+      {
+        name: 'L1 Block',
+        value: hyperlink(thousandSeperator(block.l1_block), `${l1Explorer}/b/${block.l1_block}`),
+        inline: true
+      },
       { name: 'Proposer', value: block.proposer, inline: true },
       { name: 'Participation', value: `${getPercentFromBitsetStr(getBitsetStrFromHex(block.signature.bv)).toFixed(2)}%` }
     ]
@@ -194,6 +199,11 @@ export const handler: {
       { name: `Elected Members (${epoch.election.length})`, value: epoch.election.join(', ') },
       { name: 'Election Result Data CID', value: epoch.data_cid },
       { name: 'L1 Transaction', value: `[${epoch.l1_tx}](${VSC_BLOCKS_HOME}/tx/${epoch.l1_tx})` },
+      {
+        name: 'L1 Block',
+        value: hyperlink(thousandSeperator(epoch.l1_block_num), `${l1Explorer}/b/${epoch.l1_block_num}`),
+        inline: true
+      },
       { name: 'Proposer', value: epoch.proposer, inline: true },
       { name: 'Participation', value: `${getPercentFromBitsetStr(getBitsetStrFromHex(epoch.bv)).toFixed(2)}%` }
     ]
