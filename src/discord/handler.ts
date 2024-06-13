@@ -179,7 +179,7 @@ export const handler: {
         inline: true
       },
       { name: 'Proposer', value: block.proposer, inline: true },
-      { name: 'Participation', value: `${(block.voted_weight / block.eligible_weight) * 100}%` }
+      { name: 'Participation', value: `${((block.voted_weight / block.eligible_weight) * 100).toFixed(2)}%` }
     ]
     const embed = new EmbedBuilder()
       .setTitle('VSC Block')
@@ -205,7 +205,7 @@ export const handler: {
         inline: true
       },
       { name: 'Proposer', value: epoch.proposer, inline: true },
-      { name: 'Participation', value: `${(epoch.voted_weight / epoch.eligible_weight) * 100}%` }
+      { name: 'Participation', value: `${((epoch.voted_weight / epoch.eligible_weight) * 100).toFixed(2)}%` }
     ]
     const embed = new EmbedBuilder()
       .setTitle('VSC Epoch')
