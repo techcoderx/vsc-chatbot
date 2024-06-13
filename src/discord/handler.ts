@@ -9,7 +9,7 @@ import {
   fetchEpoch
 } from '../vsc-explorer/src/requests'
 import { VSC_BLOCKS_HOME } from '../constants'
-import { getBitsetStrFromHex, getPercentFromBitsetStr, thousandSeperator } from '../vsc-explorer/src/helpers'
+import { thousandSeperator } from '../vsc-explorer/src/helpers'
 import { l1Explorer } from '../vsc-explorer/src/settings'
 
 const boolToStr = (bool: boolean) => (bool ? ':white_check_mark:' : ':x:')
@@ -179,7 +179,7 @@ export const handler: {
         inline: true
       },
       { name: 'Proposer', value: block.proposer, inline: true },
-      { name: 'Participation', value: `${getPercentFromBitsetStr(getBitsetStrFromHex(block.signature.bv)).toFixed(2)}%` }
+      { name: 'Participation', value: `${(block.voted_weight / block.eligible_weight) * 100}%` }
     ]
     const embed = new EmbedBuilder()
       .setTitle('VSC Block')
@@ -196,7 +196,7 @@ export const handler: {
     const fields: APIEmbedField[] = [
       { name: 'Epoch Number', value: thousandSeperator(epoch_num), inline: true },
       { name: 'Timestamp', value: time(new Date(epoch.ts + 'Z')), inline: true },
-      { name: `Elected Members (${epoch.election.length})`, value: epoch.election.join(', ') },
+      { name: `Elected Members (${epoch.election.length})`, value: epoch.election.map((m) => m.username).join(', ') },
       { name: 'Election Result Data CID', value: epoch.data_cid },
       { name: 'L1 Transaction', value: `[${epoch.l1_tx}](${VSC_BLOCKS_HOME}/tx/${epoch.l1_tx})` },
       {
@@ -205,7 +205,7 @@ export const handler: {
         inline: true
       },
       { name: 'Proposer', value: epoch.proposer, inline: true },
-      { name: 'Participation', value: `${getPercentFromBitsetStr(getBitsetStrFromHex(epoch.bv)).toFixed(2)}%` }
+      { name: 'Participation', value: `${(epoch.voted_weight / epoch.eligible_weight) * 100}%` }
     ]
     const embed = new EmbedBuilder()
       .setTitle('VSC Epoch')
