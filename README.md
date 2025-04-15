@@ -1,3 +1,5 @@
+### ⚠️ This repository has been deprecated. The chatbot functionalities will be re-implemented in the [unified backend](https://github.com/techcoderx/vsc-blocks-backend).
+
 # VSC Discord Bot
 
 [VSC Blocks](https://vsc.techcoderx.com) but in a chat bot interface (currently on Discord) with notifications on various events.
